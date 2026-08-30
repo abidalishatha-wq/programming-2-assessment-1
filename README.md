@@ -7,92 +7,34 @@
 
 ## 1. Analysis of Legacy Code
 
-Identify and explain the most significant flaws you discovered in `menagerie_legacy.py` (3–4 well-explained points). For each flaw, do not just describe *what* it is — explain *why* it is a problem from a software-engineering perspective by naming the principle or quality it undermines (e.g. maintainability, scalability, robustness, testability, or a named principle such as the Open/Closed Principle or separation of concerns).
+The legacy script programm is worked for a small amount of data and successfully manages a small collection of animals, but its design creates several software-engineering problems that reduce maintainability, scalability, extensibility, and testability. This current structure would become harder to manage as the zoo system grows or new requirements are introduced.
 
-**Flaw 1:**  
 
-[Name the flaw, then explain the engineering consequence and the principle it violates.]
+**Flaw 1:**.  Global Mutable State
 
-**Flaw 2:**
+The legacy program stores important application data in global variables such as animals_db, next_animal_id, and cages. Functions such as add_animal() directly depend on and modify this shared state.
 
-[Your second flaw and its consequence.]
+This  program creates weakens encapsulation by tight coupling between different parts of the program . It also makes testing and debugging more difficult because one function can change data that is used by another function.
 
-**Flaw 3:**
+Planned solution: The refactored design will introduce a MenagerieManager controller class that owns and manages the application state. This removes the need for global variables and improves maintainability, testability, and separation of responsibilities.
 
-[Your third flaw and its consequence.]
+**Flaw 2:**.   Animals Are Stored as Dictionaries
 
-**Flaw 4 (optional):**
+legacy program, make each animal is represented as a dictionary containing values such as id, name, species, health, and cage_id.
+This separates animal data from animal behaviour. For example, feeding and speaking behaviour are implemented in separate functions rather than belonging to the animal itself. Every function must also know the correct dictionary keys, which increases the risk of errors and reduces cohesion.
 
-[A further significant flaw.]
+Planned solution: The refactored system will replace animal dictionaries with an abstract Animal class and concrete subclasses such as Lion, Snake, and Parrot. This keeps related data and behaviour together and creates a clearer Object-Oriented structure (OOS).
 
----
+**Flaw 3:**.  Species Logic Violates the Open/Closed Principle
 
-## 2. Design Rationale for Refactored Solution
+The legacy program cage_roll_call() function uses an if/elif chain to determine the sound made by each species. For example, the function explicitly checks whether an animal is a lion, snake, or parrot.
+This creates an architectural problem because adding a new species, such as a penguin, would require modifying the existing roll-call function. This violates the Open/Closed Principle, which states that software should be open for extension but closed to unnecessary modification.
 
-### 2.1. Design Sketch
+Planned solution: The refactored system will use polymorphism. The abstract Animal class will define a speak() interface, and every concrete species will implement its own version. The controller can then call animal.speak() without checking the species using if/elif.
 
-Insert your class diagram or design sketch here (an image, or a clear text outline). It should show your classes — with the names you chose — their key attributes and methods, and the relationships between them (inheritance and composition). This should match what you actually built in Task 2.
+**Flaw 4:**.  Inefficient O(n) Searching
 
-[Your diagram / outline here.]
+The legacy program used feed_animal() function searches through animals_db one animal at a time until it finds the requested ID. The roll-call operation also searches through the full animal collection to find animals belonging to a particular cage.
+These operations use O(n) searching, meaning that the amount of work increases as more animals are added. Although this is acceptable for a very small system, it reduces scalability.
+Planned solution: The refactored controller will use dictionaries for ID-based access, including a dictionary of enclosures keyed by unique enclosure ID. This provides average-case O(1) lookup and gives the system a more efficient and scalable structure.
 
-### 2.2. Class Structure
-
-The brief does not prescribe class names. Give a brief overview of each class you designed, using your own names, and explain its single responsibility within the system.
-
-**Animal-hierarchy Abstract Base Class (your chosen name):**
-
-[Explain the purpose of the ABC and the interface (abstract methods) it defines.]
-
-**Concrete animal subclasses (lion, snake, parrot — your chosen names):**
-
-[Explain how these inherit from your ABC and implement its interface, and how this removes the original `if/elif` species logic.]
-
-**Container class (your chosen name):**
-
-[Describe the responsibilities of your container class and its public interface.]
-
-**Controller class (your chosen name):**
-
-[Describe the role of your controller class as the replacement for the global state and free functions, including how it provides equivalents of every legacy operation — not only move_animal.]
-
-### 2.3. Designing for Change (Extensibility)
-
-The brief states two changes the system must support: (a) adding a new species (penguins — a design thought experiment, not an implementation task), and (b) moving an animal between containers (move_animal, which you have implemented).
-
-[Explain how your design makes each of these changes easy, and which classes would — and would not — need to be modified. Refer to the relevant design principle.]
-
----
-
-## 3. Data Structure Selection
-
-### 3.1. Storing Containers in the Controller
-
-[State and justify your choice of structure for holding the containers. Explain what the container-ID key buys you compared with the original approach.]
-
-### 3.2. Holding Animals in a Container (list vs. set)
-
-**Which data structure did you choose?**
-
-[State your choice: list or set.]
-
-**Justify your choice.**
-
-[Evaluate the trade-offs — ordering, duplicate handling, lookup cost, and any hashability/equality implications for your Animal objects — and explain why your choice suits this scenario better than the alternative.]
-
-### 3.3. Storing Each Animal's Feeding History
-
-**Which data structure did you choose (e.g. list, deque, dict)?**
-
-[State your choice.]
-
-**Justify your choice.**
-
-[Evaluate the trade-offs — ordering, how the history will be read (most-recent lookup vs full iteration), and whether it should be capped or pruned — and explain why your choice suits this scenario.]
-
----
-
-## 4. Testing Summary
-
-Briefly describe the unit tests you wrote and what behaviour each one verifies (e.g. health is capped on feeding, an animal moves correctly between containers, each species speaks correctly).
-
-[Your testing summary here.]
