@@ -42,18 +42,68 @@ Planned solution: The refactored controller will use dictionaries for ID-based a
 ## 2. Design Rationale for Refactored Solution
 
 ### 2.1. Design Sketch
+                              Animal (ABC)
+                        -------------------------
+                          -  _animal_id : int
+                           _ name : str
+                            - _health : int
+                            - _feeding_history
+                        ----------------------------
+                            + animal_id
+                            + health
+                            + feeding_history
+                            + feed()
+                            + speak() [abstract]
+                            + __str__()
+                         -----------------------------
+                                    ^
+                                    |
+                                inheritance
+                +-------------------------------------------------
+                |                   |                     |
+            +--------             +------             +--------
+            Lion                  snak                  Parrot
+          + speak()               + speak()             + speak()
+
+                        +------------------------------
+                               Enclousur 
+                              - enclosure_id : str        
+                            | - _animals : list (Animal)  
+                        +------------------------------- 
+                           + animlas
+                           + add_animal()
+                           + remove_animal()
+                           + find_animal()
+                           + contains
+                           + __str__()
+                        +--------------------------------
+                                       |
+                                       |  contains   0..* 
+                                       |
+                                       V
+                                     Animal 
+
+                        +-------------------------------
                         
-                        
-
-
-
-
-
-
-
-
-
-
+                                 MenagerieManager
+                        +-------------------------------
+                                - _enclosures : dict
+                                - _animals_by_id : dict 
+                                - _next_animal_id : int 
+                        +--------------------------------
+                                + add_enclosure() 
+                                + get_enclosure() 
+                                + add_animal() 
+                                + find_animal()
+                                + feed_animal()
+                                + roll_call()
+                                + move_animal() 
+                        +--------------------------------
+                                     |
+                                     |    manages
+                                     |
+                                     V
+                                  Enclosure
 
 
 
